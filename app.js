@@ -16,11 +16,15 @@ function addMemberRow() {
     const capacityCell = newRow.insertCell(5);
     const actionCell = newRow.insertCell(6);
 
+
+
     nameCell.innerHTML = '<input type="text" class="form-control">';
     workDaysCell.innerHTML = '<input type="number" class="form-control" value="0">';
     workHoursCell.innerHTML = '<input type="number" class="form-control" value="8">';
     extraHolidaysCell.innerHTML = '<input type="number" class="form-control" value="0">';
-    otherActivitiesCell.innerHTML = '<input type="number" class="form-control" value="0">';
+    otherActivitiesCell.style.position = 'relative';
+    otherActivitiesCell.innerHTML = '<input type="number" class="form-control" value="0" style="padding-right: 80px;"> <button id="copyActivity" class="btn btn-small" style="position: absolute; top: 50%; transform: translateY(-50%); right: 10px;">&#11015;</button>';
+    
     capacityCell.innerHTML = '<p id="capacity" class="text-center">0</p>';
     actionCell.innerHTML = '<button class="btn btn-danger">X</button>';
 
@@ -37,6 +41,23 @@ function addMemberRow() {
 
     // Установим рабочие дни для нового сотрудника на основе текущих дат
     updateWorkDaysForNewMember(workDaysCell);
+    nameCell.querySelector("input").focus();
+    updateWorkDays();
+    if (tableBody.rows.length === 1) {  // If it's the first row
+        otherActivitiesCell.querySelector("#copyActivity").addEventListener("click", function() {
+            const valueToCopy = otherActivitiesCell.querySelector("input").value;
+            for (let row of tableBody.rows) {
+                if (row !== newRow) {  // Exclude the first row
+                    row.cells[4].querySelector("input").value = valueToCopy;
+                    calculateCapacity({ target: row.cells[2].querySelector("input") });  // Recalculate capacity
+                }
+            }
+            this.blur();
+        });
+    } else {
+        otherActivitiesCell.querySelector("#copyActivity").remove();  // Remove the copy button for all rows other than the first one
+    }
+    
 }
 
 function calculateCapacity(event) {
@@ -97,9 +118,14 @@ function updateWorkDays() {
     }
 }
 
+
 function saveData() {
     const tableBody = document.getElementById("teamTable").getElementsByTagName("tbody")[0];
-    const data = [];
+    const data = {
+        startDate: document.getElementById("startDate").value,
+        endDate: document.getElementById("endDate").value,
+        members: []
+    };
 
     for (let row of tableBody.rows) {
         const memberData = {
@@ -108,7 +134,7 @@ function saveData() {
             extraHolidays: row.cells[3].querySelector("input").value,
             otherActivities: row.cells[4].querySelector("input").value
         };
-        data.push(memberData);
+        data.members.push(memberData);
     }
 
     const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
@@ -118,6 +144,8 @@ function saveData() {
     a.download = "team_data.json";
     a.click();
 }
+
+
 
 function loadData(event) {
     const file = event.target.files[0];
@@ -130,7 +158,7 @@ function loadData(event) {
             while (tableBody.rows.length) {
                 tableBody.deleteRow(0);
             }
-            for (let member of data) {
+            for (let member of data.members) {
                 addMemberRow();
                 const newRow = tableBody.rows[tableBody.rows.length - 1];
                 newRow.cells[0].querySelector("input").value = member.name;
@@ -139,9 +167,12 @@ function loadData(event) {
                 newRow.cells[4].querySelector("input").value = member.otherActivities;
                 calculateCapacity({ target: newRow.cells[2].querySelector("input") });
             }
+            // Set the start and end dates from the loaded data
+            document.getElementById("startDate").value = data.startDate;
+            document.getElementById("endDate").value = data.endDate;
+            updateWorkDays();  // Update the work days based on the loaded dates
         };
     }
 }
 
-// Для демонстрации добавим 1 строку при загрузке страницы
 window.onload = addMemberRow;
