@@ -21,8 +21,8 @@ function addMemberRow() {
     workHoursCell.innerHTML = '<input type="number" class="form-control" value="8">';
     extraHolidaysCell.innerHTML = '<input type="number" class="form-control" value="0">';
     otherActivitiesCell.innerHTML = '<input type="number" class="form-control" value="0">';
-    capacityCell.innerHTML = '<span>0</span>';
-    actionCell.innerHTML = '<button class="btn btn-danger">Удалить</button>';
+    capacityCell.innerHTML = '<p id="capacity" class="text-center">0</p>';
+    actionCell.innerHTML = '<button class="btn btn-danger">X</button>';
 
     actionCell.querySelector("button").addEventListener("click", function() {
         tableBody.removeChild(newRow);
@@ -47,7 +47,7 @@ function calculateCapacity(event) {
     const otherActivitiesDays = parseInt(row.cells[4].querySelector("input").value);
 
     const capacity = (workDays * workHours) - (extraHolidays * workHours) - (otherActivitiesDays * workHours);
-    row.cells[5].querySelector("span").innerText = capacity;
+    row.cells[5].querySelector("#capacity").innerText = capacity;
 
     calculateTotalCapacity();
 }
@@ -58,7 +58,7 @@ function calculateTotalCapacity() {
     let totalCapacity = 0;
 
     for (let row of tableBody.rows) {
-        const capacity = parseInt(row.cells[5].querySelector("span").innerText);
+        const capacity = parseInt(row.cells[5].querySelector("#capacity").innerText);
         totalCapacity += capacity;
     }
 
