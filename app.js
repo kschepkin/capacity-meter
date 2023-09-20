@@ -23,7 +23,7 @@ function addMemberRow() {
     workHoursCell.innerHTML = '<input type="number" class="form-control" value="8">';
     extraHolidaysCell.innerHTML = '<input type="number" class="form-control" value="0">';
     otherActivitiesCell.style.position = 'relative';
-    otherActivitiesCell.innerHTML = '<input type="number" class="form-control" value="0" style="padding-right: 80px;"> <button id="copyActivity" class="btn btn-small" style="position: absolute; top: 50%; transform: translateY(-50%); right: 10px;">&#11015;</button>';
+    otherActivitiesCell.innerHTML = '<input type="number" class="form-control" value="0" style="padding-right: 20px;"> <button id="copyActivity" class="btn btn-small" style="position: absolute; top: 50%; transform: translateY(-50%); right: 10px; padding: 0 5px; font-size: 12px;">&#11015;</button>    ';
     
     capacityCell.innerHTML = '<p id="capacity" class="text-center">0</p>';
     actionCell.innerHTML = '<button class="btn btn-danger">X</button>';
