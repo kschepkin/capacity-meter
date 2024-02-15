@@ -137,6 +137,9 @@ function saveData() {
         data.members.push(memberData);
     }
 
+    // Сохранение в локальное хранилище
+    localStorage.setItem('teamData', JSON.stringify(data));
+
     const blob = new Blob([JSON.stringify(data)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -144,6 +147,7 @@ function saveData() {
     a.download = "team_data.json";
     a.click();
 }
+
 
 
 
@@ -175,4 +179,29 @@ function loadData(event) {
     }
 }
 
-window.onload = addMemberRow;
+window.onload = function() {
+    addMemberRow(); // Это было у вас ранее
+    // Загрузка данных из локального хранилища
+    const savedData = localStorage.getItem('teamData');
+    if (savedData) {
+        const data = JSON.parse(savedData);
+        const tableBody = document.getElementById("teamTable").getElementsByTagName("tbody")[0];
+        while (tableBody.rows.length) {
+            tableBody.deleteRow(0);
+        }
+        for (let member of data.members) {
+            addMemberRow();
+            const newRow = tableBody.rows[tableBody.rows.length - 1];
+            newRow.cells[0].querySelector("input").value = member.name;
+            newRow.cells[2].querySelector("input").value = member.workHours;
+            newRow.cells[3].querySelector("input").value = member.extraHolidays;
+            newRow.cells[4].querySelector("input").value = member.otherActivities;
+            calculateCapacity({ target: newRow.cells[2].querySelector("input") });
+        }
+        // Set the start and end dates from the loaded data
+        document.getElementById("startDate").value = data.startDate;
+        document.getElementById("endDate").value = data.endDate;
+        updateWorkDays();  // Update the work days based on the loaded dates
+    }
+};
+
