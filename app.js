@@ -348,6 +348,7 @@ function changeStream(newStream) {
         });
     }
     updateWorkDays();
+    initVacationTable(); // Инициализируем таблицу отпусков при смене стрима
     updateVacationTable();
     updateOnManualInput();
     
@@ -434,6 +435,7 @@ function showVacationModal(row) {
     modal.show();
 }
 
+
 function updateExtraHolidays(row, memberIndex) {
     const startDate = new Date(document.getElementById("startDate").value);
     const endDate = new Date(document.getElementById("endDate").value);
@@ -453,16 +455,16 @@ function updateExtraHolidays(row, memberIndex) {
         const effectiveEnd = new Date(Math.min(endDate, vacationEnd));
 
         for (let day = effectiveStart; day <= effectiveEnd; day.setDate(day.getDate() + 1)) {
-            if (day.getDay() !== 0 && day.getDay() !== 6) {
+            if (day.getDay() !== 0 && day.getDay() !== 6) { // Исключаем выходные
                 extraHolidays++;
             }
         }
+        updateVacationTable();
     });
 
     row.cells[3].querySelector("input").value = extraHolidays;
     streams[currentStream].members[memberIndex].extraHolidays = extraHolidays;
     calculateCapacity({ target: row.cells[2].querySelector("input") });
-    updateVacationTable();
     saveToLocalStorage();
 }
 
@@ -470,7 +472,7 @@ function updateVacationTable() {
     const vacationTable = document.getElementById("vacationTable");
     if (!vacationTable) {
         console.warn("Таблица отпусков не найдена");
-        initVacationTable();
+        initVacationTable(); // Создаем таблицу, если она не найдена
         return;
     }
     
@@ -504,9 +506,12 @@ function updateVacationTable() {
             deleteButton.onclick = function() {
                 member.vacations = member.vacations.filter(v => v !== vacation);
                 updateExtraHolidays(document.getElementById("teamTable").rows[index], index);
+                updateVacationTable();
                 saveToLocalStorage();
+                location.reload(); //TODO: поменять и сделать норм обработку при удалении
             };
             row.insertCell(3).appendChild(deleteButton);
+            
         });
     });
 }
@@ -534,6 +539,8 @@ function initVacationTable() {
     container.appendChild(vacationTable);
     updateVacationTable();
 }
+
+
 
 function saveToLocalStorage() {
     const data = {
@@ -565,5 +572,6 @@ function updateOnManualInput() {
 // Вызываем функцию updateOnManualInput при инициализации приложения
 document.addEventListener("DOMContentLoaded", function() {
     initApp();
+    initVacationTable();
     updateOnManualInput();
 });
