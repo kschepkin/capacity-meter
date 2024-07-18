@@ -489,30 +489,38 @@ function updateVacationTable() {
         return;
     }
 
-    streams[currentStream].members.forEach((member, index) => {
+    // Сортировка отпусков по дате
+    let vacations = [];
+    streams[currentStream].members.forEach((member, memberIndex) => {
         if (!member.vacations) {
             console.warn(`У члена команды ${member.name} отсутствует массив отпусков`);
             return;
         }
         member.vacations.forEach(vacation => {
-            const row = vacationTableBody.insertRow();
-            row.insertCell(0).textContent = member.name;
-            row.insertCell(1).textContent = vacation.start;
-            row.insertCell(2).textContent = vacation.end;
-            
-            const deleteButton = document.createElement("button");
-            deleteButton.textContent = "Удалить";
-            deleteButton.className = "btn btn-danger btn-sm";
-            deleteButton.onclick = function() {
-                member.vacations = member.vacations.filter(v => v !== vacation);
-                updateExtraHolidays(document.getElementById("teamTable").rows[index], index);
-                updateVacationTable();
-                saveToLocalStorage();
-                location.reload(); //TODO: поменять и сделать норм обработку при удалении
-            };
-            row.insertCell(3).appendChild(deleteButton);
-            
+            vacations.push({ memberIndex, memberName: member.name, ...vacation });
         });
+    });
+
+    vacations.sort((a, b) => new Date(a.start) - new Date(b.start));
+
+    // Отображение отсортированных отпусков
+    vacations.forEach(vacation => {
+        const row = vacationTableBody.insertRow();
+        row.insertCell(0).textContent = vacation.memberName;
+        row.insertCell(1).textContent = vacation.start;
+        row.insertCell(2).textContent = vacation.end;
+
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "Удалить";
+        deleteButton.className = "btn btn-danger btn-sm";
+        deleteButton.onclick = function() {
+            streams[currentStream].members[vacation.memberIndex].vacations = 
+                streams[currentStream].members[vacation.memberIndex].vacations.filter(v => v !== vacation);
+            updateExtraHolidays(document.getElementById("teamTable").rows[vacation.memberIndex], vacation.memberIndex);
+            updateVacationTable();
+            saveToLocalStorage();
+        };
+        row.insertCell(3).appendChild(deleteButton);
     });
 }
 
