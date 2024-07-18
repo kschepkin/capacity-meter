@@ -430,11 +430,11 @@ function showVacationModal(row) {
         updateExtraHolidays(row, memberIndex);
         modal.hide();
         saveToLocalStorage();
+        updateVacationTable(); // обновляем таблицу отпусков после добавления отпуска
     };
     
     modal.show();
 }
-
 
 function updateExtraHolidays(row, memberIndex) {
     const startDate = new Date(document.getElementById("startDate").value);
@@ -459,7 +459,6 @@ function updateExtraHolidays(row, memberIndex) {
                 extraHolidays++;
             }
         }
-        updateVacationTable();
     });
 
     row.cells[3].querySelector("input").value = extraHolidays;
@@ -515,10 +514,11 @@ function updateVacationTable() {
         deleteButton.className = "btn btn-danger btn-sm";
         deleteButton.onclick = function() {
             streams[currentStream].members[vacation.memberIndex].vacations = 
-                streams[currentStream].members[vacation.memberIndex].vacations.filter(v => v !== vacation);
+                streams[currentStream].members[vacation.memberIndex].vacations.filter(v => v.start !== vacation.start || v.end !== vacation.end);
             updateExtraHolidays(document.getElementById("teamTable").rows[vacation.memberIndex], vacation.memberIndex);
             updateVacationTable();
             saveToLocalStorage();
+            location.reload(); //TODO: переделать на обновление формы без апдейта страницы
         };
         row.insertCell(3).appendChild(deleteButton);
     });
@@ -547,8 +547,6 @@ function initVacationTable() {
     container.appendChild(vacationTable);
     updateVacationTable();
 }
-
-
 
 function saveToLocalStorage() {
     const data = {
