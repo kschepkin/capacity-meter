@@ -159,8 +159,14 @@ function initApp() {
     if (addMemberButton) addMemberButton.addEventListener("click", addMemberRow);
     if (saveDataButton) saveDataButton.addEventListener("click", saveData);
     if (fileInput) fileInput.addEventListener("change", loadData);
-    if (startDateInput) startDateInput.addEventListener("change", updateWorkDays);
-    if (endDateInput) endDateInput.addEventListener("change", updateWorkDays);
+    if (startDateInput) startDateInput.addEventListener("change", () => {
+        updateWorkDays();
+        updateAllExtraHolidays();
+    });
+    if (endDateInput) endDateInput.addEventListener("change", () => {
+        updateWorkDays();
+        updateAllExtraHolidays();
+    });
     if (streamSelect) streamSelect.addEventListener("change", changeStream);
     if (addStreamButton) addStreamButton.addEventListener("click", addNewStream);
     if (deleteStreamButton) deleteStreamButton.addEventListener("click", deleteStream);
@@ -213,16 +219,35 @@ function updateMemberData(row) {
 
 function calculateCapacity(event) {
     const row = event.target.closest("tr");
-    const workDays = parseInt(row.cells[1].querySelector("input").value) || 0;
-    const workHours = parseInt(row.cells[2].querySelector("input").value) || 0;
-    const extraHolidays = parseInt(row.cells[3].querySelector("input").value) || 0;
-    const otherActivitiesDays = parseInt(row.cells[4].querySelector("input").value) || 0;
+    if (!row) {
+        console.error("Не удалось найти строку для пересчета капасити");
+        return;
+    }
+    const workDaysInput = row.cells[1].querySelector("input");
+    const workHoursInput = row.cells[2].querySelector("input");
+    const extraHolidaysInput = row.cells[3].querySelector("input");
+    const otherActivitiesInput = row.cells[4].querySelector("input");
+    const capacityCell = row.cells[5].querySelector("#capacity");
 
-    const capacity = (workDays - extraHolidays - otherActivitiesDays) * workHours;
-    row.cells[5].querySelector("#capacity").innerText = capacity;
+    if (!workDaysInput || !workHoursInput || !extraHolidaysInput || !otherActivitiesInput || !capacityCell) {
+        console.error("Не удалось найти все необходимые элементы для пересчета капасити");
+        return;
+    }
+
+    const workDays = parseInt(workDaysInput.value) || 0;
+    const workHours = parseInt(workHoursInput.value) || 0;
+    const extraHolidays = parseInt(extraHolidaysInput.value) || 0;
+    const otherActivitiesDays = parseInt(otherActivitiesInput.value) || 0;
+
+    let capacity = (workDays - extraHolidays - otherActivitiesDays) * workHours;
+    if (capacity < 0) {
+        capacity = 0;
+    }
+    capacityCell.innerText = capacity;
 
     calculateTotalCapacity();
 }
+
 
 function calculateTotalCapacity() {
     const tableBody = document.getElementById("teamTable").getElementsByTagName("tbody")[0];
@@ -515,10 +540,10 @@ function updateVacationTable() {
         deleteButton.onclick = function() {
             streams[currentStream].members[vacation.memberIndex].vacations = 
                 streams[currentStream].members[vacation.memberIndex].vacations.filter(v => v.start !== vacation.start || v.end !== vacation.end);
-            updateExtraHolidays(document.getElementById("teamTable").rows[vacation.memberIndex], vacation.memberIndex);
             updateVacationTable();
+            updateAllExtraHolidays()
             saveToLocalStorage();
-            location.reload(); //TODO: переделать на обновление формы без апдейта страницы
+            
         };
         row.insertCell(3).appendChild(deleteButton);
     });
@@ -572,6 +597,14 @@ function updateOnManualInput() {
                 calculateCapacity({ target: row.cells[2].querySelector("input") });
             });
         });
+    }
+}
+
+function updateAllExtraHolidays() {
+    const tableBody = document.getElementById("teamTable").getElementsByTagName("tbody")[0];
+    for (let row of tableBody.rows) {
+        const memberIndex = Array.from(row.parentNode.children).indexOf(row);
+        updateExtraHolidays(row, memberIndex);
     }
 }
 
