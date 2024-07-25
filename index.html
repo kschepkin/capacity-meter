@@ -10,6 +10,7 @@
 <body>
     <div class="container mt-5">
         <h1 class="text-center mb-4">Расчет capacity команды</h1>
+
         <div class="row mb-3">
             <div class="col-md-3 mb-2">
                 <label for="startDate" class="form-label">Дата начала:</label>
@@ -19,7 +20,6 @@
                 <label for="endDate" class="form-label">Дата окончания:</label>
                 <input type="date" id="endDate" class="form-control">
             </div>
-            
             <div class="col-md-3 mb-2">
                 <label class="form-label">Действия с данными:</label>
                 <div class="btn-group" role="group">
@@ -28,13 +28,14 @@
                     <button onclick="document.getElementById('fileInput').click();" class="btn btn-secondary">Загрузить</button>
                 </div>
             </div>
-            
             <div class="col-md-3 mb-2">
                 <label for="streamSelect" class="form-label">Выбрать стрим:</label>
-                <div class="btn-group" role="group"> <select id="streamSelect" class="form-select"></select>
+                <div class="btn-group" role="group">
+                    <select id="streamSelect" class="form-select"></select>
                     <button id="addStream" class="btn btn-success">+</button>
                     <button id="deleteStream" class="btn btn-danger">X</button>
-                </div>
+                </div> 
+                <button class="btn btn-info" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasBottom">Инфо</button>   
             </div>
         </div>
 
@@ -57,7 +58,6 @@
 
         <div class="d-flex justify-content-between align-items-center mt-3">
             <button id="addMember" class="btn btn-success">Добавить сотрудника</button>
-            
             <div id="totalCapacity" class="alert alert-info mb-0 py-2 px-3">Общий capacity команды: 0</div>
         </div>
 
@@ -86,6 +86,78 @@
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отмена</button>
                     <button type="button" id="saveVacation" class="btn btn-primary">Сохранить</button>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title" id="offcanvasRightLabel">Назначение инструмента</h5>
+            <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Закрыть"></button>
+        </div>
+        <div class="offcanvas-body">
+            <div class="container-fluid">
+                <p>Этот инструмент предназначен для расчета и управления capacity команды, позволяя эффективно планировать рабочее время сотрудников с учетом рабочих дней, отпусков и других активностей.</p>
+                <h2 class="h4 mt-4">Инструкция по использованию</h2>
+
+                <h3 class="h5 mt-3">1. Настройка периода</h3>
+                <ul>
+                    <li>Укажите дату начала периода в поле "Дата начала"</li>
+                    <li>Укажите дату окончания периода в поле "Дата окончания"</li>
+                    <li>Система автоматически рассчитает количество рабочих дней в выбранном периоде</li>
+                </ul>
+
+                <h3 class="h5 mt-3">2. Управление стримами (командами)</h3>
+                <ul>
+                    <li>Используйте выпадающий список "Выбрать стрим" для переключения между существующими стримами</li>
+                    <li>Нажмите "Добавить стрим" для создания нового стрима (введите название в появившемся окне)</li>
+                    <li>Используйте "Удалить стрим" для удаления текущего выбранного стрима</li>
+                </ul>
+
+                <h3 class="h5 mt-3">3. Добавление и управление сотрудниками</h3>
+                <ul>
+                    <li>Нажмите "Добавить сотрудника" для добавления нового члена команды</li>
+                    <li>Заполните данные сотрудника:
+                        <ul>
+                            <li>Имя сотрудника</li>
+                            <li>Рабочие дни (автоматически заполняется, но можно изменить)</li>
+                            <li>Часы в день (по умолчанию 8, можно изменить)</li>
+                            <li>Дополнительные выходные (заполняется автоматически при добавлении отпуска)</li>
+                            <li>Прочие активности (в днях)</li>
+                        </ul>
+                    </li>
+                    <li>Для удаления сотрудника нажмите кнопку "X" в строке с его данными</li>
+                </ul>
+
+                <h3 class="h5 mt-3">4. Управление отпусками</h3>
+                <ul>
+                    <li>Нажмите кнопку "Отпуск" рядом с именем сотрудника</li>
+                    <li>В появившемся окне укажите дату начала и окончания отпуска</li>
+                    <li>Нажмите "Сохранить" для добавления отпуска</li>
+                    <li>Отпуска отображаются в таблице "Отпуска сотрудников"</li>
+                    <li>Для удаления отпуска используйте кнопку "Удалить" в таблице отпусков</li>
+                </ul>
+
+                <h3 class="h5 mt-3">5. Расчет capacity</h3>
+                <ul>
+                    <li>Capacity каждого сотрудника рассчитывается автоматически по формуле:
+                        <br><code>(Рабочие дни - Доп. выходные - Прочие активности) * Часы в день</code>
+                    </li>
+                    <li>Общий capacity команды отображается внизу страницы</li>
+                </ul>
+
+                <h3 class="h5 mt-3">6. Сохранение и загрузка данных</h3>
+                <ul>
+                    <li>Нажмите "Сохранить" для экспорта текущих данных в JSON файл</li>
+                    <li>Используйте "Загрузить" для импорта ранее сохраненных данных</li>
+                    <li>Данные автоматически сохраняются в локальном хранилище браузера</li>
+                </ul>
+
+                <h3 class="h5 mt-3">7. Дополнительные функции</h3>
+                <ul>
+                    <li>Используйте кнопку "↓" в столбце "Прочие активности" для применения значения ко всем сотрудникам</li>
+                    <li>При изменении дат периода или данных сотрудников capacity пересчитывается автоматически</li>
+                </ul>
             </div>
         </div>
     </div>
